@@ -1,0 +1,8 @@
+config.py
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+health_data.json
+health_data.csv
+.env
