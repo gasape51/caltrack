@@ -21,7 +21,7 @@ fi
 exec gunicorn app:app \
   --bind 0.0.0.0:5000 \
   "${EXTRA_BINDS[@]}" \
-  --workers 2 \œ  -
+  --workers 2 \
   --timeout 120 \
   --log-level info \
   --access-logfile -
