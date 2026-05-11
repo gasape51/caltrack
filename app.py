@@ -163,9 +163,9 @@ def build_stats(days: list[dict], today_iso: str) -> dict:
             "streak_days": _current_deficit_streak(finished),
         },
         "calorie_totals": {
-            "week": _period_total(complete, week_start, today_date),
-            "month": _period_total(complete, month_start, today_date),
-            "since_start": _period_total(complete, None, today_date),
+            "week": _period_total(finished, week_start, today_date),
+            "month": _period_total(finished, month_start, today_date),
+            "since_start": _period_total(finished, None, today_date),
         },
         "activity": {
             "avg_steps": round(avg_steps, 0) if avg_steps is not None else None,

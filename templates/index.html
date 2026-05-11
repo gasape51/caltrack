@@ -1701,12 +1701,13 @@ function renderWeek(days) {
     `${first.getDate()} – ${last.toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}`;
 
   const todayIso = isoDate(today);
+  const periodHasToday = days.some(d => d.date === todayIso);
   // Moyenne : données complètes uniquement, hors aujourd'hui
   const tracked = days.filter(d => d.complete_data && d.date !== todayIso);
   const avg = tracked.length > 0
     ? tracked.reduce((s, d) => s + d.delta, 0) / tracked.length
     : null;
-  const totalTracked = days.filter(d => d.complete_data);
+  const totalTracked = tracked;
   const totalDelta = totalTracked.length > 0
     ? totalTracked.reduce((s, d) => s + d.delta, 0)
     : null;
@@ -1721,7 +1722,9 @@ function renderWeek(days) {
   totalEl.textContent = deltaTotalLabel(totalDelta);
   totalEl.className = 'week-avg-value ' + deltaTotalClass(totalDelta);
   document.getElementById('w-total-sub').textContent =
-    totalTracked.length > 0 ? `kcal · ${trackedDaysLabel(totalTracked.length)}` : 'aucun jour suivi';
+    totalTracked.length > 0
+      ? `kcal · ${trackedDaysLabel(totalTracked.length)}${periodHasToday ? " · hors aujourd'hui" : ''}`
+      : 'aucun jour suivi';
 
   // Bar chart
   const maxAbs = Math.max(...days.map(d => d.has_data ? Math.abs(d.delta) : 0), 1);
@@ -1820,12 +1823,13 @@ function renderMonth(days, year, month) {
   for (const d of days) map[d.date] = d;
 
   const todayIso = isoDate(today);
+  const periodHasToday = days.some(d => d.date === todayIso);
   // Moyenne : données complètes uniquement, hors aujourd'hui
   const tracked    = days.filter(d => d.complete_data && d.date !== todayIso);
   const avg        = tracked.length > 0
     ? tracked.reduce((s, d) => s + d.delta, 0) / tracked.length : null;
   const greenDays  = tracked.filter(d => d.delta < 0).length;
-  const totalTracked = days.filter(d => d.complete_data);
+  const totalTracked = tracked;
   const totalDelta = totalTracked.length > 0
     ? totalTracked.reduce((s, d) => s + d.delta, 0) : null;
 
@@ -1839,7 +1843,9 @@ function renderMonth(days, year, month) {
   totalEl.textContent = deltaTotalLabel(totalDelta);
   totalEl.className = 'month-stat-val ' + deltaTotalClass(totalDelta);
   document.getElementById('m-total-sub').textContent =
-    totalTracked.length > 0 ? `Total · ${trackedDaysLabel(totalTracked.length)}` : 'Total calorique';
+    totalTracked.length > 0
+      ? `Total · ${trackedDaysLabel(totalTracked.length)}${periodHasToday ? " · hors aujourd'hui" : ''}`
+      : 'Total calorique';
 
   // Calendar grid
   const firstDay = new Date(year, month - 1, 1);
@@ -1987,6 +1993,9 @@ function renderCalorieTotal(valueId, subId, summary, withStartDate = false) {
   let sub = summary && summary.days ? `kcal · ${trackedDaysLabel(summary.days)}` : 'aucun jour suivi';
   if (withStartDate && summary && summary.start) {
     sub += ` depuis ${formatShortFr(summary.start)}`;
+  }
+  if (summary && summary.days) {
+    sub += " · hors aujourd'hui";
   }
   document.getElementById(subId).textContent = sub;
 }
