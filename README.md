@@ -10,7 +10,8 @@ Dashboard mobile-first hébergé sur Raspberry Pi, installable sur iPhone (PWA).
 health-dashboard/
 ├── app.py                    ← Flask API (routes + cache mémoire)
 ├── tracker.py                ← Logique métier Yazio + Garmin
-├── config.py                 ← 🔐 Identifiants & paramètres (à éditer)
+├── config.py                 ← Configuration via variables d'environnement
+├── .env.example              ← Exemple de configuration sans secret
 ├── requirements.txt
 ├── setup.sh                  ← Installation automatique
 ├── run.sh                    ← Démarrage Gunicorn
@@ -38,18 +39,25 @@ cd health-dashboard
 
 ### 2. Configurer les identifiants
 
-Éditez `config.py` :
+Créez un fichier `.env` local à partir de `.env.example` :
 
-```python
-YAZIO_EMAIL    = "votre@email.com"
-YAZIO_PASSWORD = "votre_mot_de_passe"
-GARMIN_EMAIL   = "votre@email.com"
-GARMIN_PASSWORD = "votre_mot_de_passe"
-
-DEFICIT_GOAL = 500   # kcal de déficit cible / jour
-STEPS_GOAL   = 10000
-STATS_START_DATE = "2026-01-01"  # optionnel: début du total "depuis le début"
+```bash
+cp .env.example .env
+nano .env
 ```
+
+```dotenv
+YAZIO_EMAIL=votre@email.com
+YAZIO_PASSWORD=votre_mot_de_passe
+GARMIN_EMAIL=votre@email.com
+GARMIN_PASSWORD=votre_mot_de_passe
+DEFICIT_GOAL=500
+STEPS_GOAL=10000
+STATS_START_DATE=2026-01-01
+```
+
+Le fichier `.env` est ignoré par git. Ne mettez jamais de secrets dans
+`config.py`, le README ou un fichier tracké.
 
 > **Note Garmin** : Le token Garmin est mis en cache dans `~/.garminconnect/`
 > (créé automatiquement au premier lancement). Si Garmin demande une 2FA,

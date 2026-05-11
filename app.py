@@ -41,6 +41,7 @@ def get_tracker() -> HealthTracker:
             return _tracker
         log.info("Initialisation Yazio + Garmin…")
         try:
+            config.require_credentials()
             yazio  = YazioClient(config.YAZIO_EMAIL, config.YAZIO_PASSWORD)
             garmin = GarminClient(config.GARMIN_EMAIL, config.GARMIN_PASSWORD,
                                   config.GARMIN_TOKEN_DIR)
