@@ -5,13 +5,25 @@ import calendar
 import time
 import threading
 import logging
+import os
 from datetime import date, timedelta
 from flask import Flask, jsonify, render_template, request
 
 import config
 from tracker import YazioClient, GarminClient, HealthTracker
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+# Configure logging to file and console
+log_dir = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, "caltrack.log")
+
+formatter = logging.Formatter("%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s")
+handler_file = logging.FileHandler(log_file)
+handler_file.setFormatter(formatter)
+handler_console = logging.StreamHandler()
+handler_console.setFormatter(formatter)
+
+logging.basicConfig(level=logging.INFO, handlers=[handler_file, handler_console])
 log = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -51,9 +63,10 @@ def get_tracker() -> HealthTracker:
             log.info("✅ Garmin connecté")
             _tracker = HealthTracker(yazio, garmin)
             _tracker_error = None
+            log.info("✅ HealthTracker initialisé avec succès")
         except Exception as e:
             _tracker_error = str(e)
-            log.error(f"❌ Erreur init tracker: {e}")
+            log.error(f"❌ Erreur init tracker: {e}", exc_info=True)
             raise
     return _tracker
 
@@ -228,6 +241,7 @@ def api_today():
         cache_set(key, data, config.CACHE_TTL_TODAY)
         return jsonify(data)
     except Exception as e:
+        log.error(f"Erreur /api/today: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 503
 
 
@@ -248,6 +262,7 @@ def api_day():
         cache_set(key, data, ttl)
         return jsonify(data)
     except Exception as e:
+        log.error(f"Erreur /api/day (date={ds}): {e}", exc_info=True)
         return jsonify({"error": str(e)}), 503
 
 
@@ -273,6 +288,7 @@ def api_week():
         cache_set(key, data, ttl)
         return jsonify(data)
     except Exception as e:
+        log.error(f"Erreur /api/week (offset={offset}, {mon}→{sun}): {e}", exc_info=True)
         return jsonify({"error": str(e)}), 503
 
 
@@ -299,6 +315,7 @@ def api_month():
         cache_set(key, data, ttl)
         return jsonify(data)
     except Exception as e:
+        log.error(f"Erreur /api/month (year={year}, month={month}): {e}", exc_info=True)
         return jsonify({"error": str(e)}), 503
 
 
