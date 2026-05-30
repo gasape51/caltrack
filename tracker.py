@@ -271,10 +271,12 @@ class HealthTracker:
         yazio_data = self.yazio.get_range(start, end)
         results = []
         cur = start
+        today = date.today()
         while cur <= end:
             ds  = cur.strftime("%Y-%m-%d")
             day = DayBalance(date=ds)
-            if ds in yazio_data:
+            has_yazio = ds in yazio_data
+            if has_yazio:
                 y = yazio_data[ds]
                 day.eaten         = y["eaten"]
                 day.protein       = y["protein"]
@@ -288,12 +290,15 @@ class HealthTracker:
                 day.goal_protein = macro_goals.get("goal_protein", 0)
                 day.goal_carbs   = macro_goals.get("goal_carbs", 0)
                 day.goal_fat     = macro_goals.get("goal_fat", 0)
-            g = self._get_garmin_day(cur)
-            day.burned_total  = g["burned_total"]
-            day.burned_active = g["burned_active"]
-            day.burned_bmr    = g["burned_bmr"]
-            day.steps         = g["steps"]
-            day.distance_km   = g["distance_km"]
+            # Garmin appelé uniquement si Yazio a des données ou si c'est aujourd'hui :
+            # sans données Yazio, complete_data sera toujours False — appel inutile.
+            if has_yazio or cur == today:
+                g = self._get_garmin_day(cur)
+                day.burned_total  = g["burned_total"]
+                day.burned_active = g["burned_active"]
+                day.burned_bmr    = g["burned_bmr"]
+                day.steps         = g["steps"]
+                day.distance_km   = g["distance_km"]
             results.append(day)
             cur += timedelta(days=1)
         return results
