@@ -1934,7 +1934,7 @@ async function loadStats() {
   document.getElementById('s-records').innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
 
   try {
-    const stats = await apiFetch('/api/stats?days=90');
+    const stats = await apiFetch('/api/stats');
     renderStats(stats);
   } catch (e) {
     document.getElementById('s-bars').innerHTML = `<div class="error-card">Erreur: ${e.message}</div>`;

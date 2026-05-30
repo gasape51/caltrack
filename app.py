@@ -321,11 +321,11 @@ def api_month():
 
 @app.route("/api/stats")
 def api_stats():
-    """GET /api/stats?days=90"""
+    """GET /api/stats — remonte jusqu'au premier jour complet disponible (365j par défaut)"""
     today = date.today()
     configured_start = getattr(config, "STATS_START_DATE", None)
     try:
-        days_count = max(7, min(int(request.args.get("days", 90)), 90))
+        days_count = max(7, int(request.args.get("days", 365)))
         start = today - timedelta(days=days_count - 1)
         # Toujours couvrir depuis le 1er du mois courant (évite de rater le jour 1 en fin de mois)
         start = min(start, today.replace(day=1))
