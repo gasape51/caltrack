@@ -254,6 +254,18 @@ class HealthTracker:
     def __init__(self, yazio: YazioClient, garmin: GarminClient):
         self.yazio  = yazio
         self.garmin = garmin
+        self._garmin_cache: dict[str, dict] = {}
+
+    def _get_garmin_day(self, target: date) -> dict:
+        """Récupère les données Garmin d'un jour passé depuis le cache si disponible."""
+        ds = target.isoformat()
+        today = date.today()
+        if target < today and ds in self._garmin_cache:
+            return self._garmin_cache[ds]
+        g = self.garmin.get_day(target)
+        if target < today:
+            self._garmin_cache[ds] = g
+        return g
 
     def get_range(self, start: date, end: date, with_meals: bool = False) -> list:
         yazio_data = self.yazio.get_range(start, end)
@@ -276,7 +288,7 @@ class HealthTracker:
                 day.goal_protein = macro_goals.get("goal_protein", 0)
                 day.goal_carbs   = macro_goals.get("goal_carbs", 0)
                 day.goal_fat     = macro_goals.get("goal_fat", 0)
-            g = self.garmin.get_day(cur)
+            g = self._get_garmin_day(cur)
             day.burned_total  = g["burned_total"]
             day.burned_active = g["burned_active"]
             day.burned_bmr    = g["burned_bmr"]
