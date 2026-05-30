@@ -2100,6 +2100,11 @@ async function hardRefresh() {
   if (currentView === 'month') await loadMonth();
   if (currentView === 'stats') await loadStats();
   btn.classList.remove('spinning');
+  // Précharger les autres vues en arrière-plan pour navigation instantanée
+  if (currentView !== 'day')   loadDay().catch(() => {});
+  if (currentView !== 'week')  loadWeek().catch(() => {});
+  if (currentView !== 'month') loadMonth().catch(() => {});
+  if (currentView !== 'stats') loadStats().catch(() => {});
 }
 
 /* ══════════════════════════════════════════════════

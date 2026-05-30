@@ -351,8 +351,11 @@ def api_stats():
 @app.route("/api/refresh", methods=["POST"])
 def api_refresh():
     global _cache
-    _cache = {}
-    return jsonify({"ok": True, "message": "Cache vidé"})
+    today = date.today()
+    recent = {(today - timedelta(days=i)).isoformat() for i in range(7)}
+    # Garder uniquement les day_ de plus de 7 jours ; tout le reste (week_, month_, stats_, today_) est vidé
+    _cache = {k: v for k, v in _cache.items() if k.startswith("day_") and k[4:] not in recent}
+    return jsonify({"ok": True, "message": "Cache vidé (7 derniers jours)"})
 
 
 if __name__ == "__main__":
