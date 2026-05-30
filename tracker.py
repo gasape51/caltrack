@@ -141,7 +141,14 @@ class YazioClient:
         self.session.headers["Authorization"] = f"Bearer {r.json()['access_token']}"
 
     def _get(self, ep: str, params=None):
-        r = self.session.get(self._url(ep), params=params, timeout=15)
+        url = self._url(ep)
+        r = self.session.get(url, params=params, timeout=15)
+        if r.status_code == 401:
+            try:
+                self.login()
+            except Exception:
+                r.raise_for_status()
+            r = self.session.get(url, params=params, timeout=15)
         r.raise_for_status()
         return r.json()
 
