@@ -716,10 +716,40 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ══════════════════════════════════════════════════
+   SWIPE NAVIGATION
+══════════════════════════════════════════════════ */
+function initSwipe() {
+  const container = document.querySelector('.views-container');
+  let startX = 0, startY = 0;
+
+  container.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  container.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+
+    // Ignorer si trop court ou majoritairement vertical (scroll)
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+    // dx > 0 = doigt vers la droite = reculer dans le temps (dir = -1)
+    // dx < 0 = doigt vers la gauche = avancer dans le temps (dir = +1)
+    const dir = dx > 0 ? -1 : 1;
+
+    if (currentView === 'day')   changeDay(dir);
+    if (currentView === 'week')  changeWeek(dir);
+    if (currentView === 'month') changeMonth(dir);
+  }, { passive: true });
+}
+
+/* ══════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('caltrack-theme') || 'dark';
   applyTheme(savedTheme);
+  initSwipe();
   loadDay();
 });
