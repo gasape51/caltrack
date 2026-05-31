@@ -18,8 +18,11 @@ if [[ "${ENABLE_IPV6:-0}" == "1" ]]; then
 fi
 
 # 2 workers, timeout 120s (les APIs Garmin/Yazio peuvent être lentes)
+HOST="${HOST:-0.0.0.0}"
+PORT="${PORT:-5000}"
+
 exec gunicorn app:app \
-  --bind 0.0.0.0:5000 \
+  --bind "${HOST}:${PORT}" \
   "${EXTRA_BINDS[@]}" \
   --workers 2 \
   --timeout 120 \
