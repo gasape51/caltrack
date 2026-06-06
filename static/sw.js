@@ -1,5 +1,5 @@
 /* CalTrack Service Worker */
-const CACHE_NAME = 'caltrack-v3';
+const CACHE_NAME = 'caltrack-v5';
 const SHELL = ['/static/manifest.json'];
 
 // Installation : mise en cache de l'app shell

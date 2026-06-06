@@ -355,6 +355,11 @@ def api_refresh():
     recent = {(today - timedelta(days=i)).isoformat() for i in range(7)}
     # Garder uniquement les day_ de plus de 7 jours ; tout le reste (week_, month_, stats_, today_) est vidé
     _cache = {k: v for k, v in _cache.items() if k.startswith("day_") and k[4:] not in recent}
+    # Vider aussi le cache Garmin interne pour les jours récents
+    try:
+        get_tracker().clear_recent_garmin_cache(7)
+    except Exception:
+        pass
     return jsonify({"ok": True, "message": "Cache vidé (7 derniers jours)"})
 
 

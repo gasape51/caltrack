@@ -257,15 +257,24 @@ class HealthTracker:
         self._garmin_cache: dict[str, dict] = {}
 
     def _get_garmin_day(self, target: date) -> dict:
-        """Récupère les données Garmin d'un jour passé depuis le cache si disponible."""
+        """Récupère les données Garmin d'un jour passé depuis le cache si disponible.
+        J-1 n'est jamais mis en cache : Garmin peut encore recevoir des syncs de la veille."""
         ds = target.isoformat()
         today = date.today()
-        if target < today and ds in self._garmin_cache:
+        yesterday = today - timedelta(days=1)
+        cacheable = target < yesterday
+        if cacheable and ds in self._garmin_cache:
             return self._garmin_cache[ds]
         g = self.garmin.get_day(target)
-        if target < today:
+        if cacheable:
             self._garmin_cache[ds] = g
         return g
+
+    def clear_recent_garmin_cache(self, days: int = 7):
+        """Vide le cache Garmin des N derniers jours (appelé lors d'un refresh manuel)."""
+        today = date.today()
+        for i in range(days):
+            self._garmin_cache.pop((today - timedelta(days=i)).isoformat(), None)
 
     def get_range(self, start: date, end: date, with_meals: bool = False) -> list:
         yazio_data = self.yazio.get_range(start, end)
